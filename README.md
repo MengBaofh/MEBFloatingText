@@ -3,7 +3,6 @@
 [English](#english) · [中文](#中文) 
 
 PocketMine-MP 5 floating text plugin.
-| | |
 
 |---|---|
 
