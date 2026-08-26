@@ -115,7 +115,7 @@ Data folder `plugin_data/MEBFloatingText/`:
 | 默认行间距 | 0.28 | Default line spacing |
 | 时区 | `Asia/Shanghai` | Affects `{time}` and `{date}` |
 
-### Implementation notes
+### Notes
 
 - Floating texts are per-player fake entities (`Network/TextActor.php`, `Network/TextView.php`). They cost no server-side entities, which is also what makes player-specific placeholders possible.
 - A single `RefreshTask` drives both the visibility and the placeholder refresh cycles, so only one scheduler task is registered.
