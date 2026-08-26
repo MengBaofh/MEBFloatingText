@@ -1,0 +1,26 @@
+name: MEBFloatingText
+main: MengBao\MEBFloatingText\Main
+version: 1.1.0
+api:
+- 5.0.0
+load: POSTWORLD
+softdepend: [MEBForms, MEBSociety]
+author: MengBao
+website:
+description: A floatingText plugin with GUI, multi-language, multi-line layout, alignment, auto word wrap and placeholders.
+commands:
+ mebft:
+  description: Managing MEB floatingTexts
+  permission: MEBFloatingText.ge
+  usage: '/mebft help'
+  aliases:
+  - ft
+  - floatingtext
+
+permissions:
+ MEBFloatingText.ge:
+  default: true
+  description: General command
+ MEBFloatingText.op:
+  default: op
+  description: Op command
