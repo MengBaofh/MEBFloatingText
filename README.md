@@ -4,10 +4,9 @@
 
 PocketMine-MP 5 floating text plugin.
 
+| | |
 |---|---|
-
 | API | `5.0.0` |
-
 | Load | `POSTWORLD` |
 
 ---
