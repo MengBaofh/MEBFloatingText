@@ -78,7 +78,6 @@ Write these into the text; they are substituted on every refresh:
 | `{date}` | Current date |
 | `{money}` | Player money (requires MEBSociety, returns 0 without it) |
 | `{line}` | A divider line |
-| `{br}` | Line break |
 
 ### Dependencies (optional)
 
@@ -191,7 +190,6 @@ id 只能包含字母、数字、下划线、减号，长度 1-32。
 | `{date}` | 当前日期 |
 | `{money}` | 玩家游戏币（需要 MEBSociety，缺失时返回 0） |
 | `{line}` | 一条分割线 |
-| `{br}` | 换行 |
 
 ### 依赖（可选）
 
