@@ -22,7 +22,7 @@ Places multi-line floating text in the world — spawn announcements, warp signs
 - **Multi-line layout** — one floating text holds many lines; add, edit, insert and delete them individually instead of rewriting the whole thing.
 - **Alignment** — left / center / right. Computed from character-width metrics (`Render/FontMetrics.php`) and padded with spaces for visual alignment.
 - **Automatic word wrap** — set a pixel width cap per floating text and long lines wrap on their own; `0` disables it.
-- **Adjustable line spacing** — 0.05 to 2.0, default 0.28.
+- **Adjustable line spacing** — 0.05 to 2.0, default 0.28. Note: You need to re-toggle the display (`/mebft visible`) to see the spacing changes take effect.
 - **Dynamic placeholders** — write `{online}`, `{tps}` and friends into the text and they refresh on the configured interval. Each player is sent their own private entity, so per-player placeholders such as `{player}` and `{ping}` resolve correctly for everyone.
 - **Colors and line breaks** — in commands, use `&` in place of `§` for colors and `\n` for a line break.
 - **GUI management** — everything is reachable through forms; a player typing bare `/mebft` opens the main menu (requires MEBForms).
@@ -178,7 +178,7 @@ PocketMine-MP 5 浮空字插件。
 - **多行排版**：一条浮空字包含多行文本，可以按行增删改，不用整条重写。
 - **对齐方式**：左对齐 / 居中 / 右对齐。基于字宽度量（`Render/FontMetrics.php`）计算，用空格补位实现视觉对齐。
 - **自动折行**：给一条浮空字设定像素宽度上限，超长的行自动换行；设为 0 关闭该功能。
-- **行间距可调**：0.05 - 2.0，默认 0.28。
+- **行间距可调**：0.05 - 2.0，默认 0.28。注意：修改行间距后需要重新切换显示（`/mebft visible`）才会看见效果。
 - **动态变量**：文本里写 `{online}`、`{tps}` 这类占位符，按配置的间隔自动刷新。因为每个玩家看到的是独立实体，所以 `{player}`、`{ping}` 这种玩家相关的变量也能正确显示各自的值。
 - **颜色与换行**：指令里用 `&` 代替 `§` 写颜色，用 `\n` 换行。
 - **GUI 管理**：整套功能都有GUI表单界面，直接输 `/mebft` 就会打开主菜单（需要安装 MEBForms）。
