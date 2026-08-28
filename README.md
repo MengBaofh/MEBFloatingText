@@ -324,10 +324,3 @@ if (FloatingTextAPI::isAvailable()) {
 
 ---
 
-## 更新日志
-
-| 版本 | 变更 |
-| --- | --- |
-| v1.2.0 | 新增浮空字归属权与插件托管机制，开放公开 API（详见 [CHANGELOG120](CHANGELOG120.md)） |
-
----
