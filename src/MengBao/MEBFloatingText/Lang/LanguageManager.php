@@ -24,6 +24,17 @@ final class LanguageManager
     /** @var array<string, string> 当前语言的键值表 */
     private array $data = [];
 
+    /**
+     * 插件内置的键值表，用于补齐服主文件里缺的键
+     *
+     * 数据目录里的语言文件不会被插件更新覆盖(否则服主的修改就丢了)，
+     * 于是升级后新增的键在老文件里是不存在的，只靠$data会显示成§c[键名]。
+     * 这里再兜一层内置文件，服主什么都不用做就能看到新版的提示文本。
+     *
+     * @var array<string, string>
+     */
+    private array $builtinData = [];
+
     private string $current = self::FALLBACK;
 
     public function __construct(
@@ -57,6 +68,7 @@ final class LanguageManager
 
         //连兜底语言都没有的话保持空表，get()会返回键名，至少不会崩
         $this->data = $file === null ? [] : (new Config($file, Config::YAML))->getAll();
+        $this->builtinData = $this->loadBuiltin($code);
         $this->current = $code;
 
         if ($this->data === []) {
@@ -64,6 +76,36 @@ final class LanguageManager
             return;
         }
         $this->plugin->getLogger()->info($this->get("lang_loaded", ["lang" => $code]));
+    }
+
+    /**
+     * 读取插件包内的语言文件(而不是数据目录里的那份)
+     *
+     * @return array<string, string>
+     */
+    private function loadBuiltin(string $code): array
+    {
+        if (!$this->isValidCode($code)) {
+            return [];
+        }
+        $stream = $this->plugin->getResource("language/{$code}.yml");
+        if ($stream === null) {
+            return [];
+        }
+        try {
+            $raw = stream_get_contents($stream);
+        } finally {
+            fclose($stream);
+        }
+        if (!is_string($raw) || $raw === "") {
+            return [];
+        }
+        try {
+            $parsed = yaml_parse($raw);
+        } catch (\Throwable) {
+            return [];
+        }
+        return is_array($parsed) ? $parsed : [];
     }
 
     private function getLanguageFile(string $code): ?string
@@ -91,6 +133,10 @@ final class LanguageManager
     public function get(string $key, array $params = []): string
     {
         $text = $this->data[$key] ?? null;
+        if (!is_string($text)) {
+            //服主的语言文件是老版本的话，新增的键只在插件包里有
+            $text = $this->builtinData[$key] ?? null;
+        }
         if (!is_string($text)) {
             //缺键时把键名显示出来，方便补翻译，而不是显示成空白
             return "§c[" . $key . "]";

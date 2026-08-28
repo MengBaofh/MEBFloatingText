@@ -1,6 +1,6 @@
 name: MEBFloatingText
 main: MengBao\MEBFloatingText\Main
-version: 1.1.0
+version: 1.2.0
 api:
 - 5.0.0
 load: POSTWORLD
@@ -24,3 +24,6 @@ permissions:
  MEBFloatingText.op:
   default: op
   description: Op command
+ MEBFloatingText.master:
+  default: false
+  description: Full control over owned floatingTexts, including changing their owner

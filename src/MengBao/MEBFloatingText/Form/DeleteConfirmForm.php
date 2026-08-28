@@ -18,8 +18,7 @@ final class DeleteConfirmForm
     public static function open(Main $plugin, Player $player, string $id): void
     {
         $lang = $plugin->getLang();
-        if ($plugin->getManager()->get($id) === null) {
-            FormHelper::error($plugin, $player, $lang->get("not_exist", ["id" => $id]));
+        if (FormHelper::requireManageable($plugin, $player, $id) === null) {
             return;
         }
 
@@ -27,6 +26,9 @@ final class DeleteConfirmForm
             //关闭窗口等同于选了第二个按钮，都按"不删除"处理
             if ($data !== true) {
                 DetailForm::open($plugin, $player, $id);
+                return;
+            }
+            if (FormHelper::requireManageable($plugin, $player, $id) === null) {
                 return;
             }
             if (!$plugin->getManager()->remove($id)) {

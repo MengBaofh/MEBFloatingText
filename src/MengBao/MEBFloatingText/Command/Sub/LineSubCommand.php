@@ -23,6 +23,14 @@ final class LineSubCommand extends SubCommand
     }
 
 
+    /**
+     * 权限由requireEditable按归属逐条判断，不在路由层拦
+     */
+    public function isOpOnly(): bool
+    {
+        return false;
+    }
+
     public function getDescriptionKey(): string
     {
         return "desc_line";
@@ -34,7 +42,8 @@ final class LineSubCommand extends SubCommand
             $this->sendUsage($sender);
             return;
         }
-        $text = $this->requireText($sender, $args[0]);
+        //行编辑改的是内容，托管中的浮空字不允许手改
+        $text = $this->requireEditable($sender, $args[0]);
         if ($text === null) {
             return;
         }

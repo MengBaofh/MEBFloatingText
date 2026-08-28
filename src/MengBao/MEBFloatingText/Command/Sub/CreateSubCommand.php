@@ -59,6 +59,10 @@ final class CreateSubCommand extends SubCommand
         //站立点稍微抬高一点，让文字浮在头顶附近而不是埋进地里
         $position = $player->getPosition()->add(0, $this->plugin->getSpawnOffset(), 0);
         $lines = explode("\n", $this->joinText(array_slice($args, 1)));
+
+        //手动创建的浮空字不记户主，仍然是"服务器的"，任何op都能管——
+        //服主们一起装饰服务器是常态，记了户主反而会互相管不了。
+        //需要归属时用 /mebft owner 单独指定。
         $text = $this->getManager()->create($id, $player->getWorld()->getFolderName(), $position, $lines);
         if ($text === null) {
             $this->error($sender, "create_failed");

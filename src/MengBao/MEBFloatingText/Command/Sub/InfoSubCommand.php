@@ -64,6 +64,12 @@ final class InfoSubCommand extends SubCommand
                 ? $this->tr("info_state_shown")
                 : $this->tr("info_state_hidden"),
         ]));
+        $sender->sendMessage($this->tr("info_owner", [
+            "owner" => $text->hasOwner() ? (string) $text->getOwner() : $this->tr("owner_none"),
+        ]));
+        $sender->sendMessage($this->tr("info_managed", [
+            "plugin" => $text->isManaged() ? (string) $text->getManagedBy() : $this->tr("owner_unmanaged"),
+        ]));
         $sender->sendMessage($this->tr("info_content", ["count" => $text->getLineCount()]));
         foreach ($text->getLines() as $index => $line) {
             $sender->sendMessage($this->tr("info_content_line", ["index" => $index + 1, "text" => $line]));

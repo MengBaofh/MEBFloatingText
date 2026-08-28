@@ -8,6 +8,7 @@ use MengBao\MEBFloatingText\Lang\LanguageManager;
 use MengBao\MEBFloatingText\Main;
 use MengBao\MEBFloatingText\Text\FloatingText;
 use MengBao\MEBFloatingText\Text\FloatingTextManager;
+use MengBao\MEBFloatingText\Text\TextGuard;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
 
@@ -49,7 +50,14 @@ abstract class SubCommand
         return $this->lang()->get($this->getDescriptionKey());
     }
 
-    /** 是否需要op权限 */
+    /**
+     * 是否需要op权限
+     *
+     * 注意: 改动单条浮空字的子指令(remove/move/line/...)返回false，
+     * 因为浮空字可能属于某个普通玩家，户主本人必须能管理自己的浮空字。
+     * 这类子指令的权限由requireManageable按归属逐条判断，
+     * 不属于自己又不是op的话照样会被拦下来。
+     */
     public function isOpOnly(): bool
     {
         return true;
@@ -114,6 +122,43 @@ abstract class SubCommand
         $text = $this->getManager()->get($id);
         if ($text === null) {
             $sender->sendMessage($this->plugin->getPrefix() . $this->tr("not_exist", ["id" => $id]));
+            return null;
+        }
+        return $text;
+    }
+
+    /**
+     * 按id取浮空字，同时检查管理权限
+     *
+     * 有户主的浮空字op也动不了，所以改动类的子指令都要走这里，
+     * 不能只用requireText。
+     */
+    protected function requireManageable(CommandSender $sender, string $id): ?FloatingText
+    {
+        $text = $this->requireText($sender, $id);
+        if ($text === null) {
+            return null;
+        }
+        if (!TextGuard::canManage($this->plugin, $sender, $text)) {
+            $this->error($sender, TextGuard::denyKey($text), ["owner" => (string) $text->getOwner()]);
+            return null;
+        }
+        return $text;
+    }
+
+    /**
+     * 按id取浮空字，同时检查内容编辑权限
+     *
+     * 托管中的浮空字内容由插件生成，改了会被覆盖，所以单独拦一层。
+     */
+    protected function requireEditable(CommandSender $sender, string $id): ?FloatingText
+    {
+        $text = $this->requireManageable($sender, $id);
+        if ($text === null) {
+            return null;
+        }
+        if ($text->isManaged()) {
+            $this->error($sender, "managed_by_plugin", ["plugin" => (string) $text->getManagedBy()]);
             return null;
         }
         return $text;

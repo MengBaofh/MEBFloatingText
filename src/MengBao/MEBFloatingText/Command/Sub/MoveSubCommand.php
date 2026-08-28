@@ -21,6 +21,14 @@ final class MoveSubCommand extends SubCommand
     }
 
 
+    /**
+     * 权限由requireManageable按归属逐条判断，不在路由层拦
+     */
+    public function isOpOnly(): bool
+    {
+        return false;
+    }
+
     public function getDescriptionKey(): string
     {
         return "desc_move";
@@ -32,7 +40,7 @@ final class MoveSubCommand extends SubCommand
             $this->sendUsage($sender);
             return;
         }
-        $text = $this->requireText($sender, $args[0]);
+        $text = $this->requireManageable($sender, $args[0]);
         if ($text === null) {
             return;
         }

@@ -30,7 +30,11 @@ final class FloatingText
     /** 是否含变量的缓存 */
     private ?bool $dynamicCache = null;
 
-    /** @param string[] $lines */
+    /**
+     * @param string[]    $lines
+     * @param string|null $owner     户主(小写玩家名)，null表示服务器公共浮空字
+     * @param string|null $managedBy 托管插件名，非null表示内容由该插件生成
+     */
     public function __construct(
         private readonly string $id,
         private string $worldName,
@@ -40,12 +44,59 @@ final class FloatingText
         private int $maxWidth = 0,
         private float $lineSpacing = self::DEFAULT_LINE_SPACING,
         private bool $visible = true,
+        private ?string $owner = null,
+        private ?string $managedBy = null,
     ) {
     }
 
     public function getId(): string
     {
         return $this->id;
+    }
+
+    /**
+     * 户主名，null表示这条浮空字属于服务器而不是某个玩家
+     */
+    public function getOwner(): ?string
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?string $owner): void
+    {
+        //玩家名统一按小写存，和MEBSociety那边的约定保持一致
+        $this->owner = $owner === null || $owner === "" ? null : strtolower($owner);
+    }
+
+    public function hasOwner(): bool
+    {
+        return $this->owner !== null;
+    }
+
+    public function isOwnedBy(string $playerName): bool
+    {
+        return $this->owner !== null && $this->owner === strtolower($playerName);
+    }
+
+    /**
+     * 托管插件名
+     *
+     * 有托管插件时，内容由那个插件按自己的模板生成，
+     * 手动改内容会在下一次刷新时被覆盖，所以要拦住内容编辑。
+     */
+    public function getManagedBy(): ?string
+    {
+        return $this->managedBy;
+    }
+
+    public function setManagedBy(?string $managedBy): void
+    {
+        $this->managedBy = $managedBy === null || $managedBy === "" ? null : $managedBy;
+    }
+
+    public function isManaged(): bool
+    {
+        return $this->managedBy !== null;
     }
 
     public function getWorldName(): string
@@ -229,6 +280,8 @@ final class FloatingText
             "最大宽度" => $this->maxWidth,
             "行间距" => round($this->lineSpacing, 3),
             "是否显示" => $this->visible,
+            "所有者" => $this->owner,
+            "托管插件" => $this->managedBy,
             "内容" => $this->lines,
         ];
     }
@@ -252,6 +305,11 @@ final class FloatingText
             return null;
         }
 
+        //1.1.0及更早的数据没有这两个键，缺失时按"服务器公共浮空字"处理，
+        //这样老配置直接就能用，行为和升级前完全一致
+        $owner = $data["所有者"] ?? null;
+        $managedBy = $data["托管插件"] ?? null;
+
         return new self(
             $id,
             $worldName,
@@ -261,6 +319,8 @@ final class FloatingText
             max(0, (int) ($data["最大宽度"] ?? 0)),
             (float) ($data["行间距"] ?? self::DEFAULT_LINE_SPACING),
             (bool) ($data["是否显示"] ?? true),
+            is_string($owner) && $owner !== "" ? strtolower($owner) : null,
+            is_string($managedBy) && $managedBy !== "" ? $managedBy : null,
         );
     }
 }

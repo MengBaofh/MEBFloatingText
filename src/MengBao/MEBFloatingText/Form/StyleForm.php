@@ -17,9 +17,8 @@ final class StyleForm
     public static function open(Main $plugin, Player $player, string $id): void
     {
         $lang = $plugin->getLang();
-        $text = $plugin->getManager()->get($id);
+        $text = FormHelper::requireManageable($plugin, $player, $id);
         if ($text === null) {
-            FormHelper::error($plugin, $player, $lang->get("not_exist", ["id" => $id]));
             return;
         }
         $aligns = FormHelper::alignOptions();
@@ -28,9 +27,8 @@ final class StyleForm
             if ($data === null) {
                 return;
             }
-            $text = $plugin->getManager()->get($id);
+            $text = FormHelper::requireManageable($plugin, $player, $id);
             if ($text === null) {
-                FormHelper::error($plugin, $player, $lang->get("not_exist", ["id" => $id]));
                 return;
             }
             $text->setAlign(TextAlign::tryParse($aligns[(int) $data[0]] ?? null) ?? TextAlign::CENTER);

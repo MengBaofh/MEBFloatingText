@@ -13,6 +13,7 @@ use MengBao\MEBFloatingText\Command\Sub\LangSubCommand;
 use MengBao\MEBFloatingText\Command\Sub\LineSubCommand;
 use MengBao\MEBFloatingText\Command\Sub\ListSubCommand;
 use MengBao\MEBFloatingText\Command\Sub\MoveSubCommand;
+use MengBao\MEBFloatingText\Command\Sub\OwnerSubCommand;
 use MengBao\MEBFloatingText\Command\Sub\ReloadSubCommand;
 use MengBao\MEBFloatingText\Command\Sub\RemoveSubCommand;
 use MengBao\MEBFloatingText\Command\Sub\SpacingSubCommand;
@@ -49,6 +50,7 @@ final class CommandRouter
         $this->register(new SpacingSubCommand($plugin));
         $this->register(new MoveSubCommand($plugin));
         $this->register(new VisibleSubCommand($plugin));
+        $this->register(new OwnerSubCommand($plugin));
         $this->register(new VarsSubCommand($plugin));
         $this->register(new LangSubCommand($plugin));
         $this->register(new ReloadSubCommand($plugin));

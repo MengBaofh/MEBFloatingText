@@ -16,9 +16,8 @@ final class EditContentForm
     public static function open(Main $plugin, Player $player, string $id): void
     {
         $lang = $plugin->getLang();
-        $text = $plugin->getManager()->get($id);
+        $text = FormHelper::requireEditable($plugin, $player, $id);
         if ($text === null) {
-            FormHelper::error($plugin, $player, $lang->get("not_exist", ["id" => $id]));
             return;
         }
 
@@ -26,10 +25,9 @@ final class EditContentForm
             if ($data === null) {
                 return;
             }
-            //回调触发时可能已经被别人删掉了，重新取一次
-            $text = $plugin->getManager()->get($id);
+            //回调触发时可能已经被别人删掉了，权限也要再判一次
+            $text = FormHelper::requireEditable($plugin, $player, $id);
             if ($text === null) {
-                FormHelper::error($plugin, $player, $lang->get("not_exist", ["id" => $id]));
                 return;
             }
             $lines = FormHelper::parseLines((string) $data[0]);

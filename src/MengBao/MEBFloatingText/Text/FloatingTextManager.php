@@ -131,10 +131,18 @@ final class FloatingTextManager
     /**
      * 新建一条浮空字，id重复时返回null
      *
-     * @param string[] $lines
+     * @param string[]    $lines
+     * @param string|null $owner     户主(玩家名)，给了之后op就管不了这条浮空字
+     * @param string|null $managedBy 托管插件名，给了之后内容不允许手改
      */
-    public function create(string $id, string $worldName, Vector3 $position, array $lines): ?FloatingText
-    {
+    public function create(
+        string $id,
+        string $worldName,
+        Vector3 $position,
+        array $lines,
+        ?string $owner = null,
+        ?string $managedBy = null,
+    ): ?FloatingText {
         if ($this->exists($id)) {
             return null;
         }
@@ -147,11 +155,47 @@ final class FloatingTextManager
             TextAlign::tryParse((string) $settings->get("默认对齐方式", "center")) ?? TextAlign::CENTER,
             max(0, (int) $settings->get("默认最大宽度", 0)),
             (float) $settings->get("默认行间距", FloatingText::DEFAULT_LINE_SPACING),
+            true,
+            $owner === null || $owner === "" ? null : strtolower($owner),
+            $managedBy === null || $managedBy === "" ? null : $managedBy,
         );
         $this->texts[strtolower($id)] = $text;
         $this->save();
         $this->refreshAll($text);
         return $text;
+    }
+
+    /**
+     * 某个玩家名下的全部浮空字
+     *
+     * @return array<string, FloatingText>
+     */
+    public function getByOwner(string $playerName): array
+    {
+        $playerName = strtolower($playerName);
+        $found = [];
+        foreach ($this->texts as $key => $text) {
+            if ($text->isOwnedBy($playerName)) {
+                $found[$key] = $text;
+            }
+        }
+        return $found;
+    }
+
+    /**
+     * 某个插件托管的全部浮空字
+     *
+     * @return array<string, FloatingText>
+     */
+    public function getByManager(string $pluginName): array
+    {
+        $found = [];
+        foreach ($this->texts as $key => $text) {
+            if ($text->getManagedBy() === $pluginName) {
+                $found[$key] = $text;
+            }
+        }
+        return $found;
     }
 
     public function remove(string $id): bool

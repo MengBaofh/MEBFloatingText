@@ -6,6 +6,7 @@ namespace MengBao\MEBFloatingText\Form;
 
 use MengBao\MEBFloatingText\Main;
 use MengBao\MEBFloatingText\Render\TextRenderer;
+use MengBao\MEBFloatingText\Text\TextGuard;
 use MengBao\MEBForms\SimpleForm;
 use pocketmine\player\Player;
 
@@ -22,12 +23,19 @@ final class DetailForm
             FormHelper::error($plugin, $player, $lang->get("not_exist", ["id" => $id]));
             return;
         }
-        $isOp = $player->hasPermission("MEBFloatingText.op");
 
-        //只读用户只能看详情和返回
-        $actions = $isOp
-            ? ["content", "style", "move", "toggle", "delete", "back"]
-            : ["back"];
+        //按归属决定按钮，而不是简单看op：
+        //有户主的浮空字op也管不了，反过来户主本人是普通玩家也得能管自己的
+        $canManage = TextGuard::canManage($plugin, $player, $text);
+        //托管中的浮空字内容由插件生成，改了会被下次刷新覆盖，所以不给编辑按钮
+        $canEdit = TextGuard::canEditContent($plugin, $player, $text);
+
+        $actions = ["back"];
+        if ($canManage) {
+            $actions = $canEdit
+                ? ["content", "style", "move", "toggle", "delete", "back"]
+                : ["style", "move", "toggle", "delete", "back"];
+        }
 
         $form = new SimpleForm(function (Player $player, $data) use ($plugin, $id, $actions): void {
             if ($data === null) {
@@ -64,6 +72,12 @@ final class DetailForm
                 "state" => $text->isVisible()
                     ? $lang->get("info_state_shown")
                     : $lang->get("info_state_hidden"),
+            ]) . "\n"
+            . $lang->get("info_owner", [
+                "owner" => $text->hasOwner() ? (string) $text->getOwner() : $lang->get("owner_none"),
+            ]) . "\n"
+            . $lang->get("info_managed", [
+                "plugin" => $text->isManaged() ? (string) $text->getManagedBy() : $lang->get("owner_unmanaged"),
             ]) . "\n\n"
             . $lang->get("info_content", ["count" => $text->getLineCount()]) . "\n";
         foreach ($text->getLines() as $index => $line) {
@@ -96,9 +110,8 @@ final class DetailForm
 
     private static function moveHere(Main $plugin, Player $player, string $id): void
     {
-        $text = $plugin->getManager()->get($id);
+        $text = FormHelper::requireManageable($plugin, $player, $id);
         if ($text === null) {
-            FormHelper::error($plugin, $player, $plugin->getLang()->get("not_exist", ["id" => $id]));
             return;
         }
         $worldName = $player->getWorld()->getFolderName();
@@ -124,9 +137,8 @@ final class DetailForm
 
     private static function toggle(Main $plugin, Player $player, string $id): void
     {
-        $text = $plugin->getManager()->get($id);
+        $text = FormHelper::requireManageable($plugin, $player, $id);
         if ($text === null) {
-            FormHelper::error($plugin, $player, $plugin->getLang()->get("not_exist", ["id" => $id]));
             return;
         }
         $text->setVisible(!$text->isVisible());

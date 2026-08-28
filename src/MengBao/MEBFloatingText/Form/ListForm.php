@@ -52,7 +52,9 @@ final class ListForm
                 $preview = mb_substr($preview, 0, 14, "UTF-8") . "...";
             }
             $position = $text->getPosition();
-            $buttonText = "§e" . $text->getId() . " §7[" . $state . "§7]\n§7"
+            //有户主的浮空字标一下，免得op点进去才发现自己动不了
+            $ownerTag = $text->hasOwner() ? " §6" . $text->getOwner() : "";
+            $buttonText = "§e" . $text->getId() . " §7[" . $state . "§7]" . $ownerTag . "\n§7"
                 . $text->getWorldName() . " ("
                 . (int) $position->x . "," . (int) $position->y . "," . (int) $position->z . ") §f" . $preview;
             //用id作为label，回调里直接拿到id，不用再按索引反查

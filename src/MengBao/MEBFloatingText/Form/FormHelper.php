@@ -6,6 +6,8 @@ namespace MengBao\MEBFloatingText\Form;
 
 use MengBao\MEBFloatingText\Main;
 use MengBao\MEBFloatingText\Render\TextAlign;
+use MengBao\MEBFloatingText\Text\FloatingText;
+use MengBao\MEBFloatingText\Text\TextGuard;
 use pocketmine\player\Player;
 
 /**
@@ -16,6 +18,49 @@ final class FormHelper
     private function __construct()
     {
         //工具类，禁止实例化
+    }
+
+    /**
+     * 按id取浮空字并检查管理权限，不通过时自动提示
+     *
+     * 每个会改数据的界面都要走这里，不能只靠DetailForm不给按钮：
+     * 表单响应是客户端发上来的，改过的客户端可以重放一个旧表单，
+     * 权限必须在真正落库的那一步再判一次。
+     */
+    public static function requireManageable(Main $plugin, Player $player, string $id): ?FloatingText
+    {
+        $text = $plugin->getManager()->get($id);
+        if ($text === null) {
+            self::error($plugin, $player, $plugin->getLang()->get("not_exist", ["id" => $id]));
+            return null;
+        }
+        if (!TextGuard::canManage($plugin, $player, $text)) {
+            self::error($plugin, $player, $plugin->getLang()->get(
+                TextGuard::denyKey($text),
+                ["owner" => (string) $text->getOwner()]
+            ));
+            return null;
+        }
+        return $text;
+    }
+
+    /**
+     * 按id取浮空字并检查内容编辑权限，不通过时自动提示
+     */
+    public static function requireEditable(Main $plugin, Player $player, string $id): ?FloatingText
+    {
+        $text = self::requireManageable($plugin, $player, $id);
+        if ($text === null) {
+            return null;
+        }
+        if ($text->isManaged()) {
+            self::error($plugin, $player, $plugin->getLang()->get(
+                "managed_by_plugin",
+                ["plugin" => (string) $text->getManagedBy()]
+            ));
+            return null;
+        }
+        return $text;
     }
 
     /**
