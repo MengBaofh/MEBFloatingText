@@ -30,10 +30,6 @@ class Main extends PluginBase
 
     public function onLoad(): void
     {
-        $this->getLogger()->info("§c--------------------");
-        $this->getLogger()->info("§aMEBFloatingText插件加载中...");
-        $this->getLogger()->info("§a作者:梦宝(fanghao)");
-        $this->getLogger()->info("§c--------------------");
     }
 
     public function onEnable(): void
