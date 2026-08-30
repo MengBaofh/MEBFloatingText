@@ -22,7 +22,9 @@ final class PlaceholderResolver
     }
 
     /**
-     * 支持的变量，值是语言文件里对应的说明键名
+     * 变量说明表，值是语言文件里对应的说明键名
+     *
+     * 只用于展示。{br}仍然可用但不列出，替换表见buildReplacements。
      *
      * @return array<string, string>
      */
@@ -30,6 +32,7 @@ final class PlaceholderResolver
     {
         return [
             "{player}" => "var_player",
+            "{rank}" => "var_rank",
             "{online}" => "var_online",
             "{max}" => "var_max",
             "{world}" => "var_world",
@@ -40,7 +43,6 @@ final class PlaceholderResolver
             "{date}" => "var_date",
             "{money}" => "var_money",
             "{line}" => "var_line",
-            "{br}" => "var_br",
         ];
     }
 
@@ -73,6 +75,7 @@ final class PlaceholderResolver
 
         return [
             "{player}" => $player->getName(),
+            "{rank}" => $this->resolveRank($player),
             "{online}" => (string) count($this->server->getOnlinePlayers()),
             "{max}" => (string) $this->server->getMaxPlayers(),
             "{world}" => $player->getWorld()->getDisplayName(),
@@ -83,8 +86,32 @@ final class PlaceholderResolver
             "{date}" => $date,
             "{money}" => $this->resolveMoney($player),
             "{line}" => "§7--------------------",
+            //{br}不在说明表里，但老数据里写过的还要认，见getDescriptionKeys
             "{br}" => "\n",
         ];
+    }
+
+    /**
+     * 玩家权限称谓，来自MEBSociety(最高权限/OP/SVIP/VIP/玩家)
+     *
+     * 没装MEBSociety时按op状态退化成OP/玩家。
+     */
+    private function resolveRank(Player $player): string
+    {
+        $playerName = strtolower($player->getName());
+        $plugin = $this->server->getPluginManager()->getPlugin("MEBSociety");
+        $players = "\\MengBao\\MEBSociety\\Units\\Players";
+        if ($plugin !== null && $plugin->isEnabled() && class_exists($players)) {
+            try {
+                $rank = $players::getInstance($plugin)->getRand($playerName);
+                if (is_string($rank) && $rank !== "") {
+                    return $rank;
+                }
+            } catch (\Throwable) {
+                //MEBSociety未初始化该玩家时会抛异常，往下走兜底逻辑
+            }
+        }
+        return $player->hasPermission("MEBFloatingText.op") ? "OP" : "玩家";
     }
 
     /**

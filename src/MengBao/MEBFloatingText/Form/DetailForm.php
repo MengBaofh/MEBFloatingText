@@ -6,6 +6,7 @@ namespace MengBao\MEBFloatingText\Form;
 
 use MengBao\MEBFloatingText\Main;
 use MengBao\MEBFloatingText\Render\TextRenderer;
+use MengBao\MEBFloatingText\Text\ManagedPlacement;
 use MengBao\MEBFloatingText\Text\TextGuard;
 use MengBao\MEBForms\SimpleForm;
 use pocketmine\player\Player;
@@ -115,15 +116,26 @@ final class DetailForm
             return;
         }
         $worldName = $player->getWorld()->getFolderName();
+        $position = $player->getPosition()->add(0, $plugin->getSpawnOffset(), 0);
+        //托管插件对位置可能有自己的规矩，比如领地浮空字必须留在领地范围内
+        if (!ManagedPlacement::canMoveTo($text, $worldName, $position)) {
+            FormHelper::error($plugin, $player, $plugin->getLang()->get(
+                ManagedPlacement::denyKey($text),
+                ["plugin" => (string) $text->getManagedBy()]
+            ));
+            self::open($plugin, $player, $id);
+            return;
+        }
         //跨世界时先撤掉旧世界里的实体，否则那边会留下一份
         if ($text->getWorldName() !== $worldName) {
             foreach ($plugin->getServer()->getOnlinePlayers() as $online) {
                 $plugin->getManager()->despawn($online, $text);
             }
         }
-        $position = $player->getPosition()->add(0, $plugin->getSpawnOffset(), 0);
         $text->setPosition($worldName, $position);
         $plugin->getManager()->update($text);
+        //把新位置回写给托管插件，否则它下次刷新会按旧坐标搬回去
+        ManagedPlacement::commitMove($text, $worldName, $position);
 
         FormHelper::success($plugin, $player, $plugin->getLang()->get("move_success", [
             "id" => $id,

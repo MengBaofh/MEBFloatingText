@@ -130,6 +130,25 @@ final class FormHelper
         return str_replace("§", "&", implode("\\n", $lines));
     }
 
+    /**
+     * 把输入框里的内容当成单独一行处理，&转§
+     *
+     * 和parseLines的区别是不拆行，换行符一律压成空格。
+     */
+    public static function parseLine(string $content): string
+    {
+        $content = str_replace(["\\n", "\r\n", "\r", "\n"], " ", $content);
+        return trim(str_replace("&", "§", $content));
+    }
+
+    /**
+     * 把一行内容还原成输入框里的写法，供编辑时回填
+     */
+    public static function toInput(string $line): string
+    {
+        return str_replace("§", "&", $line);
+    }
+
     public static function success(Main $plugin, Player $player, string $message): void
     {
         $player->sendMessage($plugin->getPrefix() . "§a" . $message);

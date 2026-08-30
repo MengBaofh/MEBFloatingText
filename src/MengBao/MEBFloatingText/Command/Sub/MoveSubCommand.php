@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MengBao\MEBFloatingText\Command\Sub;
 
 use MengBao\MEBFloatingText\Command\SubCommand;
+use MengBao\MEBFloatingText\Text\ManagedPlacement;
 use pocketmine\command\CommandSender;
 use pocketmine\math\Vector3;
 
@@ -62,6 +63,14 @@ final class MoveSubCommand extends SubCommand
             return;
         }
 
+        //托管插件对位置可能有自己的规矩，比如领地浮空字必须留在领地范围内
+        if (!ManagedPlacement::canMoveTo($text, $worldName, $position)) {
+            $this->error($sender, ManagedPlacement::denyKey($text), [
+                "plugin" => (string) $text->getManagedBy(),
+            ]);
+            return;
+        }
+
         //换世界时要先把旧世界里的实体撤掉
         if ($text->getWorldName() !== $worldName) {
             foreach ($this->plugin->getServer()->getOnlinePlayers() as $online) {
@@ -71,6 +80,8 @@ final class MoveSubCommand extends SubCommand
 
         $text->setPosition($worldName, $position);
         $this->getManager()->update($text);
+        //把新位置回写给托管插件，否则它下次刷新会按旧坐标搬回去
+        ManagedPlacement::commitMove($text, $worldName, $position);
         $this->success($sender, "move_success", [
             "id" => $text->getId(),
             "world" => $worldName,

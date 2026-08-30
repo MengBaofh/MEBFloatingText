@@ -71,6 +71,7 @@ Write these into the text; they are substituted on every refresh:
 | Placeholder | Meaning |
 |---|---|
 | `{player}` | Player name |
+| `{rand}` | Player rank: Master/OP/SVIP/VIP/Player (from MEBSociety; falls back to OP/Player without it) |
 | `{online}` | Online player count |
 | `{max}` | Server max players |
 | `{world}` | World the player is in |
@@ -227,6 +228,7 @@ id 只能包含字母、数字、下划线、减号，长度 1-32。
 | 变量 | 含义 |
 |---|---|
 | `{player}` | 玩家名 |
+| `{rand}` | 玩家权限：最高权限/OP/SVIP/VIP/玩家（取自 MEBSociety，缺失时退化为 OP/玩家） |
 | `{online}` | 在线人数 |
 | `{max}` | 服务器最大人数 |
 | `{world}` | 玩家所在世界名 |
